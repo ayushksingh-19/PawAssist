@@ -13,3 +13,16 @@ export const getServices = async () => {
     return buildFallbackOverview().services;
   }
 };
+
+export const getProviders = async () => {
+  try {
+    if (!(await canUseApi())) {
+      throw new Error("API unavailable");
+    }
+
+    const response = await API.get("/services/providers");
+    return response.data;
+  } catch {
+    return buildFallbackOverview().providers;
+  }
+};

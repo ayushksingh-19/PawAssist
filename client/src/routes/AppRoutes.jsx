@@ -43,7 +43,7 @@ export default function AppRoutes() {
 
         <Route element={<ProtectedRoutes />}>
           <Route path="/app" element={<AppShell />}>
-            <Route index element={<Navigate to="/app/home" replace />} />
+            <Route index element={<Navigate to="/app/dashboard" replace />} />
             <Route path="home" element={<Home />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="pets" element={<Pets />} />

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL?.trim() || "http://localhost:5001/api";
+  import.meta.env.VITE_API_BASE_URL?.trim() || "http://localhost:5000/api";
 let apiStatus = "unknown";
 let lastCheckedAt = 0;
 let inFlightHealthCheck = null;

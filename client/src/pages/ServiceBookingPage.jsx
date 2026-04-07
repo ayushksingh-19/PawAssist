@@ -1,18 +1,19 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import useAppData from "../services/useAppData";
 import useUserStore from "../store/useUserStore";
 import { createBooking } from "../services/bookingService";
 
-const allServices = [
-  { id: "vet-visit", title: "Vet Consultation", price: 599, tone: "blue" },
-  { id: "grooming", title: "Premium Grooming", price: 899, tone: "pink" },
-  { id: "training", title: "Expert Training", price: 799, tone: "purple" },
-  { id: "ambulance", title: "Emergency Response", price: 1499, tone: "orange" },
-];
-
 const defaultSlots = ["09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:30 PM"];
 const emergencySlots = ["Within 10 mins", "Within 20 mins", "Within 30 mins"];
+
+const toneByCategory = {
+  core: "blue",
+  healthcare: "green",
+  wellness: "purple",
+  "daily-care": "pink",
+  special: "orange",
+};
 
 export default function ServiceBookingPage() {
   const [searchParams] = useSearchParams();
@@ -26,6 +27,8 @@ export default function ServiceBookingPage() {
   const [selectedPet, setSelectedPet] = useState("pet-1");
   const [selectedDate, setSelectedDate] = useState("2026-04-12");
   const [status, setStatus] = useState("");
+
+  const allServices = data?.services || [];
 
   const bookingMode = useMemo(() => {
     if (mode === "emergency" || requestedService === "ambulance") {
@@ -41,14 +44,14 @@ export default function ServiceBookingPage() {
       };
     }
 
-    if (mode === "consult" || requestedService === "vet-visit") {
+    if (mode === "consult" || requestedService === "vet-visit" || requestedService === "premium-vet-visit") {
       return {
         title: "Vet Consultation Booking",
         subtitle: "Structured consult flow for symptoms, follow-up advice, and home-care planning.",
         heroClass: "page-hero ocean consult-hero",
         badge: "Consultation workflow",
         note: "Vet consultation scheduled from professional consult flow",
-        serviceIds: ["vet-visit"],
+        serviceIds: ["vet-visit", "premium-vet-visit", "health-checkup", "cardiac-screening"],
         providerRoles: ["Emergency Vet"],
         slots: defaultSlots,
       };
@@ -61,8 +64,8 @@ export default function ServiceBookingPage() {
         heroClass: "page-hero violet training-hero",
         badge: "Training workflow",
         note: "Training session booked from behavior coaching flow",
-        serviceIds: ["training"],
-        providerRoles: ["Canine Trainer"],
+        serviceIds: ["training", "fitness-training"],
+        providerRoles: ["Canine Trainer", "Fitness Coach"],
         slots: defaultSlots,
       };
     }
@@ -77,16 +80,37 @@ export default function ServiceBookingPage() {
       providerRoles: [],
       slots: defaultSlots,
     };
-  }, [mode, requestedService]);
+  }, [allServices, mode, requestedService]);
 
   const visibleServices = allServices.filter((service) => bookingMode.serviceIds.includes(service.id));
-  const visibleProviders = data?.providers.filter((provider) =>
-    bookingMode.providerRoles.length ? bookingMode.providerRoles.includes(provider.role) : true,
-  ) || [];
+  const selectedServiceObject = visibleServices.find((service) => service.id === selectedService) || visibleServices[0];
+  const visibleProviders = (data?.providers || []).filter((provider) => {
+    if (bookingMode.providerRoles.length) {
+      return bookingMode.providerRoles.includes(provider.role);
+    }
 
-  const selectedServiceDetails = allServices.find((item) => item.id === selectedService);
+    if (selectedServiceObject?.providerRole) {
+      return provider.role === selectedServiceObject.providerRole;
+    }
+
+    return true;
+  });
+
+  const selectedServiceDetails = allServices.find((item) => item.id === selectedService) || visibleServices[0];
   const selectedProviderDetails = visibleProviders.find((item) => item.id === selectedProvider) || visibleProviders[0];
   const selectedPetDetails = data?.pets.find((item) => item.id === selectedPet);
+
+  useEffect(() => {
+    if (visibleServices[0]?.id && !visibleServices.some((service) => service.id === selectedService)) {
+      setSelectedService(visibleServices[0].id);
+    }
+  }, [selectedService, visibleServices]);
+
+  useEffect(() => {
+    if (visibleProviders[0]?.id && !visibleProviders.some((provider) => provider.id === selectedProvider)) {
+      setSelectedProvider(visibleProviders[0].id);
+    }
+  }, [selectedProvider, visibleProviders]);
 
   if (loading || !data) {
     return <div className="panel">Loading booking tools...</div>;
@@ -137,12 +161,12 @@ export default function ServiceBookingPage() {
           {visibleServices.map((service) => (
             <button
               key={service.id}
-              className={`service-choice-card ${service.tone}${selectedService === service.id ? " selected" : ""}`}
+              className={`service-choice-card ${toneByCategory[service.category] || "blue"}${selectedService === service.id ? " selected" : ""}`}
               onClick={() => setSelectedService(service.id)}
             >
-              <div className={`feature-icon ${service.tone}`}>{service.title.slice(0, 1)}</div>
+              <div className={`feature-icon ${toneByCategory[service.category] || "blue"}`}>{service.name.slice(0, 1)}</div>
               <div>
-                <strong>{service.title}</strong>
+                <strong>{service.name}</strong>
                 <p>Rs {service.price}</p>
               </div>
             </button>
@@ -246,7 +270,7 @@ export default function ServiceBookingPage() {
         <div className="booking-summary-grid">
           <div>
             <span>Service</span>
-            <strong>{selectedServiceDetails?.title}</strong>
+            <strong>{selectedServiceDetails?.name}</strong>
           </div>
           <div>
             <span>Provider</span>

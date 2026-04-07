@@ -1,8 +1,28 @@
 import { useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import heroImage from "../assets/hero.png";
 import { loginUser } from "../services/authService";
 import useUserStore from "../store/useUserStore";
+
+const loginHeroImage =
+  "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=1200&q=80";
+
+const loginHighlights = [
+  {
+    icon: "PR",
+    title: "Pet Profile Ready",
+    text: "Set up your details and step into your care dashboard in minutes.",
+  },
+  {
+    icon: "BK",
+    title: "Bookings and Reminders",
+    text: "Track appointments, wellness tasks, and follow-ups in one place.",
+  },
+  {
+    icon: "HR",
+    title: "Health Records",
+    text: "Keep everyday pet updates organized from the very beginning.",
+  },
+];
 
 export default function AuthLoginPage() {
   const navigate = useNavigate();
@@ -12,7 +32,7 @@ export default function AuthLoginPage() {
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState("");
-  const redirectTo = location.state?.from || "/app/home";
+  const redirectTo = "/app/dashboard";
 
   const otpValue = useMemo(() => otp.join(""), [otp]);
 
@@ -64,34 +84,40 @@ export default function AuthLoginPage() {
       <div className="paw-login-layout">
         <section className="paw-login-info">
           <div className="paw-login-hero-card">
-            <img src={heroImage} alt="French bulldog in a clinic" className="paw-login-hero-image" />
-            <div className="paw-login-trust">Trusted by 50K+ pet parents</div>
+            <img src={loginHeroImage} alt="Two happy dogs running outdoors" className="paw-login-hero-image" />
+            <div className="paw-login-trust">Create your care hub in under a minute</div>
           </div>
 
-          <div className="paw-login-benefits">
-            <div className="paw-benefit-title-row">
-              <div className="paw-benefit-icon">*</div>
-              <h2>Why Choose PawAssist?</h2>
+          <div className="paw-login-benefits paw-auth-story">
+            <div className="paw-benefit-title-row paw-auth-story-head">
+              <div className="paw-benefit-icon">PA</div>
+              <div>
+                <span className="paw-auth-eyebrow">Start with PawAssist</span>
+                <h2>Everything in one place</h2>
+              </div>
             </div>
 
-            {[
-              "24/7 emergency veterinary support",
-              "AI-powered health monitoring",
-              "Instant video consultations",
-              "Top-rated professional vets",
-              "Complete pet care in one dashboard",
-            ].map((item) => (
-              <div key={item} className="paw-benefit-item">
-                <span>+</span>
-                <p>{item}</p>
-              </div>
-            ))}
+            <p className="paw-auth-story-copy">
+              Build your pet&apos;s care space once and manage visits, reminders, records, and support without the chaos.
+            </p>
+
+            <div className="paw-auth-story-list">
+              {loginHighlights.map((item) => (
+                <div key={item.title} className="paw-auth-story-item">
+                  <span>{item.icon}</span>
+                  <div>
+                    <h3>{item.title}</h3>
+                    <p>{item.text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
         <section className="paw-login-card">
           <h1>Welcome Back</h1>
-          <p>Your pet&apos;s wellbeing is our priority</p>
+          <p>Log in and continue caring for your pet from one warm dashboard</p>
 
           <label className="paw-field">
             <span>Phone Number</span>
@@ -103,7 +129,7 @@ export default function AuthLoginPage() {
                 onChange={(event) => setPhone(event.target.value)}
               />
               <button type="button" className="paw-input-action" onClick={handleSendOtp}>
-                Go
+                OTP
               </button>
             </div>
           </label>
@@ -139,7 +165,7 @@ export default function AuthLoginPage() {
           {error ? <p className="error-text">{error}</p> : null}
 
           <button type="button" className="paw-gradient-button" onClick={handleLogin}>
-            {otpSent ? "Verify & Continue to Dashboard" : "Login"}
+            {otpSent ? "Verify & Continue" : "Login"}
           </button>
 
           <div className="paw-divider">
@@ -151,7 +177,7 @@ export default function AuthLoginPage() {
           <Link
             to="/register"
             state={location.state}
-            className="paw-social-button"
+            className="paw-social-button paw-secondary-button"
             style={{ justifyContent: "center" }}
           >
             <strong>Create Account</strong>

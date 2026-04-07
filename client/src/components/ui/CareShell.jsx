@@ -4,7 +4,6 @@ import useSystemStatus from "../../services/useSystemStatus";
 import PawAssistBrand from "./PawAssistBrand";
 
 const navigation = [
-  { to: "/app/home", label: "Home", icon: "HM" },
   { to: "/app/dashboard", label: "Dashboard", icon: "DB" },
   { to: "/app/pets", label: "My Pets", icon: "PT" },
   { to: "/app/booking", label: "Bookings", icon: "BK" },

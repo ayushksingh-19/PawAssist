@@ -50,7 +50,7 @@ export default function Login() {
     try {
       const response = await loginUser({ phone });
       setUser(response.user);
-      navigate("/app/home");
+      navigate("/app/dashboard");
     } catch (err) {
       setError("Login failed. Please try again.");
       console.error("Login Error:", err);

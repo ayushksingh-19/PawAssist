@@ -1,8 +1,28 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import heroImage from "../assets/hero.png";
 import { loginUser } from "../services/authService";
 import useUserStore from "../store/useUserStore";
+
+const loginHeroImage =
+  "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=1200&q=80";
+
+const loginHighlights = [
+  {
+    icon: "PR",
+    title: "Pet Profile Ready",
+    text: "Set up your details and step into your care dashboard in minutes.",
+  },
+  {
+    icon: "BK",
+    title: "Bookings and Reminders",
+    text: "Track appointments, wellness tasks, and follow-ups in one place.",
+  },
+  {
+    icon: "HR",
+    title: "Health Records",
+    text: "Keep everyday pet updates organized from the very beginning.",
+  },
+];
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -50,7 +70,7 @@ export default function LoginPage() {
     try {
       const response = await loginUser({ phone });
       setUser(response.user);
-      navigate("/app/home");
+      navigate("/app/dashboard");
     } catch (err) {
       setError("Login failed. Please try again.");
       console.error("Login Error:", err);
@@ -62,34 +82,40 @@ export default function LoginPage() {
       <div className="paw-login-layout">
         <section className="paw-login-info">
           <div className="paw-login-hero-card">
-            <img src={heroImage} alt="French bulldog in a clinic" className="paw-login-hero-image" />
-            <div className="paw-login-trust">Trusted by 50K+ pet parents</div>
+            <img src={loginHeroImage} alt="Two happy dogs running outdoors" className="paw-login-hero-image" />
+            <div className="paw-login-trust">Create your care hub in under a minute</div>
           </div>
 
-          <div className="paw-login-benefits">
-            <div className="paw-benefit-title-row">
-              <div className="paw-benefit-icon">✦</div>
-              <h2>Why Choose CareConnect?</h2>
+          <div className="paw-login-benefits paw-auth-story">
+            <div className="paw-benefit-title-row paw-auth-story-head">
+              <div className="paw-benefit-icon">PA</div>
+              <div>
+                <span className="paw-auth-eyebrow">Start with PawAssist</span>
+                <h2>Everything in one place</h2>
+              </div>
             </div>
 
-            {[
-              "24/7 Emergency Veterinary Support",
-              "AI-Powered Health Monitoring",
-              "Instant Video Consultations",
-              "Top-Rated Professional Vets",
-              "Complete Pet Care Solutions",
-            ].map((item) => (
-              <div key={item} className="paw-benefit-item">
-                <span>✓</span>
-                <p>{item}</p>
-              </div>
-            ))}
+            <p className="paw-auth-story-copy">
+              Build your pet&apos;s care space once and manage visits, reminders, records, and support without the chaos.
+            </p>
+
+            <div className="paw-auth-story-list">
+              {loginHighlights.map((item) => (
+                <div key={item.title} className="paw-auth-story-item">
+                  <span>{item.icon}</span>
+                  <div>
+                    <h3>{item.title}</h3>
+                    <p>{item.text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
         <section className="paw-login-card">
-          <h1>Welcome Back 👋</h1>
-          <p>Your pet&apos;s wellbeing is our priority</p>
+          <h1>Welcome Back</h1>
+          <p>Log in and continue caring for your pet from one warm dashboard</p>
 
           <label className="paw-field">
             <span>Phone Number</span>
@@ -101,7 +127,7 @@ export default function LoginPage() {
                 onChange={(event) => setPhone(event.target.value)}
               />
               <button type="button" className="paw-input-action" onClick={handleSendOtp}>
-                ⚡
+                OTP
               </button>
             </div>
           </label>
@@ -148,18 +174,17 @@ export default function LoginPage() {
 
           <div className="paw-social-row">
             <button type="button" className="paw-social-button">
-              <span>🍎</span>
+              <span>AP</span>
               <strong>Apple</strong>
             </button>
             <button type="button" className="paw-social-button">
-              <span>🔎</span>
+              <span>GO</span>
               <strong>Google</strong>
             </button>
           </div>
 
           <p className="paw-terms">
-            By continuing, you agree to our <strong>Terms of Service</strong> and{" "}
-            <strong>Privacy Policy</strong>
+            By continuing, you agree to our <strong>Terms of Service</strong> and <strong>Privacy Policy</strong>
           </p>
         </section>
       </div>
