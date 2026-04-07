@@ -5,7 +5,7 @@ import Login from "../pages/AuthLoginPage";
 import Register from "../pages/RegisterPage";
 import Home from "../pages/PostLoginHome.jsx";
 import Dashboard from "../pages/CareDashboard";
-import Pets from "../pages/Pets";
+import Pets from "../pages/PetsDashboardPage";
 import Booking from "../pages/ServiceBookingPage.jsx";
 import Tracking from "../pages/Tracking";
 import Grooming from "../pages/Grooming";
@@ -60,6 +60,7 @@ export default function AppRoutes() {
             <Route path="community" element={<Community />} />
             <Route path="insurance" element={<Insurance />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="settings" element={<Profile />} />
           </Route>
         </Route>
       </Routes>

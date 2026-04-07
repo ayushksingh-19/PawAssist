@@ -5,6 +5,10 @@ const {
   baseBookings,
   buildOverview,
 } = require("./staticData");
+const { DEFAULT_PASSWORD, createDefaultSettings, normalizeSettingsPayload } = require("./settingsDefaults");
+const { hashPassword, verifyPassword } = require("./security");
+
+const defaultPasswordRecord = hashPassword(DEFAULT_PASSWORD);
 
 let users = [
   {
@@ -15,6 +19,9 @@ let users = [
     email: "care@pawassist.app",
     petName: "Bruno",
     notes: "Appointments, health reminders, and support updates",
+    settings: createDefaultSettings(),
+    passwordHash: defaultPasswordRecord.hash,
+    passwordSalt: defaultPasswordRecord.salt,
   },
 ];
 
@@ -40,6 +47,60 @@ function getUserPets(userId) {
   return petsByUser[userId];
 }
 
+function addPet(userId, payload) {
+  const nextPet = {
+    id: `pet-${Date.now()}`,
+    petId: `pet-${Date.now()}`,
+    userId,
+    name: payload.name,
+    type: payload.type,
+    breed: payload.breed || payload.type,
+    gender: payload.gender || "Male",
+    age: payload.age,
+    weight: payload.weight,
+    color: payload.color || "",
+    mood: payload.mood || "Happy",
+    nextCare: payload.nextCare || "Wellness review coming up",
+    diet: payload.diet || payload.dietaryNeeds || "",
+    medicalHistory: payload.medicalHistory || "",
+    allergies: payload.allergies || "None",
+    photo: payload.photo || "",
+  };
+
+  const pets = getUserPets(userId);
+  petsByUser[userId] = [nextPet, ...pets];
+  return nextPet;
+}
+
+function updatePet(userId, petId, patch) {
+  const pets = getUserPets(userId);
+  const index = pets.findIndex((pet) => pet.petId === petId || pet.id === petId);
+
+  if (index === -1) {
+    return null;
+  }
+
+  pets[index] = {
+    ...pets[index],
+    ...patch,
+    diet: patch.diet || patch.dietaryNeeds || pets[index].diet,
+  };
+
+  return pets[index];
+}
+
+function deletePet(userId, petId) {
+  const pets = getUserPets(userId);
+  const nextPets = pets.filter((pet) => pet.petId !== petId && pet.id !== petId);
+
+  if (nextPets.length === pets.length) {
+    return false;
+  }
+
+  petsByUser[userId] = nextPets;
+  return true;
+}
+
 function loginUser({ phone, name }) {
   const normalizedPhone = String(phone || "").trim();
   let user = users.find((entry) => entry.phone === normalizedPhone);
@@ -53,9 +114,21 @@ function loginUser({ phone, name }) {
       email: "care@pawassist.app",
       petName: "",
       notes: "Appointments, health reminders, and support updates",
+      settings: createDefaultSettings(),
+      passwordHash: defaultPasswordRecord.hash,
+      passwordSalt: defaultPasswordRecord.salt,
     };
     users.push(user);
     getUserPets(user.id);
+  }
+
+  if (!user.settings) {
+    user.settings = createDefaultSettings();
+  }
+
+  if (!user.passwordHash || !user.passwordSalt) {
+    user.passwordHash = defaultPasswordRecord.hash;
+    user.passwordSalt = defaultPasswordRecord.salt;
   }
 
   return user;
@@ -74,6 +147,57 @@ function updateUser(userId, patch) {
   };
 
   return users[index];
+}
+
+function getUserSettings(userId) {
+  const user = getUserById(userId);
+  if (!user) {
+    return null;
+  }
+
+  user.settings = normalizeSettingsPayload(user.settings);
+  return user.settings;
+}
+
+function updateUserSettings(userId, patch) {
+  const index = users.findIndex((entry) => entry.id === userId);
+
+  if (index === -1) {
+    return null;
+  }
+
+  users[index].settings = normalizeSettingsPayload(patch);
+  return users[index].settings;
+}
+
+function changeUserPassword(userId, currentPassword, nextPassword) {
+  const index = users.findIndex((entry) => entry.id === userId);
+
+  if (index === -1) {
+    return { ok: false, reason: "not_found" };
+  }
+
+  if (!verifyPassword(currentPassword, users[index].passwordHash, users[index].passwordSalt)) {
+    return { ok: false, reason: "invalid_current_password" };
+  }
+
+  const nextRecord = hashPassword(nextPassword);
+  users[index].passwordHash = nextRecord.hash;
+  users[index].passwordSalt = nextRecord.salt;
+  return { ok: true };
+}
+
+function deleteUserAccount(userId) {
+  const nextUsers = users.filter((entry) => entry.id !== userId);
+
+  if (nextUsers.length === users.length) {
+    return false;
+  }
+
+  users = nextUsers;
+  delete petsByUser[userId];
+  bookings = bookings.filter((booking) => booking.userId !== userId);
+  return true;
 }
 
 function createBooking(payload) {
@@ -102,6 +226,13 @@ module.exports = {
   providers,
   loginUser,
   updateUser,
+  getUserSettings,
+  updateUserSettings,
+  changeUserPassword,
+  deleteUserAccount,
+  addPet,
+  updatePet,
+  deletePet,
   getBookings,
   createBooking,
   getOverview,

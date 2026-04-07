@@ -60,13 +60,11 @@ export default function RegisterPage() {
       const response = await loginUser({
         name: form.name.trim(),
         phone: form.phone.trim(),
+        petName: form.petName.trim(),
+        city: form.city.trim(),
       });
 
-      setUser({
-        ...response.user,
-        petName: form.petName.trim() || "Buddy",
-        city: form.city.trim() || response.user.city || "Kolkata",
-      });
+      setUser(response.user);
       navigate(redirectTo, { replace: true });
     } catch (err) {
       setError("Registration failed. Please try again.");

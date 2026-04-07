@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { loginUser } from "../services/authService";
+import { loginWithOtp, requestOtp } from "../services/authService";
 import useUserStore from "../store/useUserStore";
 
 const loginHeroImage =
@@ -31,31 +31,102 @@ export default function AuthLoginPage() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [otpSent, setOtpSent] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [error, setError] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
+  const [issuedOtp, setIssuedOtp] = useState("");
+  const otpRefs = useRef([]);
   const redirectTo = "/app/dashboard";
+  const normalizedPhone = `+91${phone}`;
 
   const otpValue = useMemo(() => otp.join(""), [otp]);
 
-  const updateOtp = (index, value) => {
-    const digit = value.replace(/\D/g, "").slice(-1);
-    const nextOtp = [...otp];
-    nextOtp[index] = digit;
-    setOtp(nextOtp);
+  const focusOtpIndex = (index) => {
+    otpRefs.current[index]?.focus();
+    otpRefs.current[index]?.select();
   };
 
-  const handleSendOtp = () => {
-    if (!phone.trim()) {
+  const updateOtp = (index, rawValue) => {
+    const digits = rawValue.replace(/\D/g, "");
+    if (!digits) {
+      const nextOtp = [...otp];
+      nextOtp[index] = "";
+      setOtp(nextOtp);
+      return;
+    }
+
+    const nextOtp = [...otp];
+    digits.slice(0, otp.length - index).split("").forEach((digit, offset) => {
+      nextOtp[index + offset] = digit;
+    });
+    setOtp(nextOtp);
+
+    const nextIndex = Math.min(index + digits.length, otp.length - 1);
+    focusOtpIndex(nextIndex);
+  };
+
+  const handleOtpKeyDown = (index, event) => {
+    if (event.key === "Backspace" && !otp[index] && index > 0) {
+      focusOtpIndex(index - 1);
+      return;
+    }
+
+    if (event.key === "ArrowLeft" && index > 0) {
+      event.preventDefault();
+      focusOtpIndex(index - 1);
+      return;
+    }
+
+    if (event.key === "ArrowRight" && index < otp.length - 1) {
+      event.preventDefault();
+      focusOtpIndex(index + 1);
+    }
+  };
+
+  const handleOtpPaste = (event) => {
+    event.preventDefault();
+    const pastedDigits = event.clipboardData.getData("text").replace(/\D/g, "").slice(0, otp.length);
+    if (!pastedDigits) {
+      return;
+    }
+
+    const nextOtp = [...otp];
+    pastedDigits.split("").forEach((digit, index) => {
+      nextOtp[index] = digit;
+    });
+    setOtp(nextOtp);
+    focusOtpIndex(Math.min(pastedDigits.length - 1, otp.length - 1));
+  };
+
+  const handleSendOtp = async () => {
+    if (phone.length !== 10) {
       setError("Enter a phone number first.");
       return;
     }
 
+    setIsSendingOtp(true);
     setError("");
-    setOtpSent(true);
+    setStatusMessage("");
+    setIssuedOtp("");
+    setOtp(["", "", "", ""]);
+
+    try {
+      const response = await requestOtp({ phone: normalizedPhone });
+      setOtpSent(true);
+      setStatusMessage("OTP sent for this phone number.");
+      setIssuedOtp(response.otp || "");
+      window.setTimeout(() => focusOtpIndex(0), 0);
+    } catch (err) {
+      setError(err?.response?.data?.message || "Unable to send OTP right now.");
+    } finally {
+      setIsSendingOtp(false);
+    }
   };
 
   const handleLogin = async () => {
-    if (!phone.trim()) {
-      setError("Enter a phone number first.");
+    if (phone.length !== 10) {
+      setError("Enter your 10-digit phone number to continue.");
       return;
     }
 
@@ -69,13 +140,19 @@ export default function AuthLoginPage() {
       return;
     }
 
+    setIsVerifyingOtp(true);
+    setError("");
+    setStatusMessage("");
+
     try {
-      const response = await loginUser({ phone });
+      const response = await loginWithOtp({ phone: normalizedPhone, otp: otpValue });
       setUser(response.user);
       navigate(redirectTo, { replace: true });
     } catch (err) {
-      setError("Login failed. Please try again.");
+      setError(err?.response?.data?.message || "Login failed. Please try again.");
       console.error("Login Error:", err);
+    } finally {
+      setIsVerifyingOtp(false);
     }
   };
 
@@ -122,14 +199,24 @@ export default function AuthLoginPage() {
           <label className="paw-field">
             <span>Phone Number</span>
             <div className="paw-input-shell">
+              <span style={{ color: "#334155", fontWeight: 700, paddingRight: "10px" }}>+91</span>
               <input
                 type="tel"
-                placeholder="+91 98765 43210"
+                inputMode="numeric"
+                placeholder="98765 43210"
                 value={phone}
-                onChange={(event) => setPhone(event.target.value)}
+                onChange={(event) => {
+                  const nextPhone = event.target.value.replace(/\D/g, "").slice(0, 10);
+                  setPhone(nextPhone);
+                  setOtpSent(false);
+                  setOtp(["", "", "", ""]);
+                  setError("");
+                  setStatusMessage("");
+                  setIssuedOtp("");
+                }}
               />
-              <button type="button" className="paw-input-action" onClick={handleSendOtp}>
-                OTP
+              <button type="button" className="paw-input-action" onClick={handleSendOtp} disabled={isSendingOtp}>
+                {isSendingOtp ? "..." : "OTP"}
               </button>
             </div>
           </label>
@@ -147,7 +234,13 @@ export default function AuthLoginPage() {
                       maxLength={1}
                       value={digit}
                       onChange={(event) => updateOtp(index, event.target.value)}
-                      className={`paw-otp-box${index === 0 ? " active" : ""}`}
+                      onKeyDown={(event) => handleOtpKeyDown(index, event)}
+                      onFocus={() => focusOtpIndex(index)}
+                      onPaste={handleOtpPaste}
+                      ref={(node) => {
+                        otpRefs.current[index] = node;
+                      }}
+                      className={`paw-otp-box${digit ? " active" : ""}`}
                     />
                   ))}
                 </div>
@@ -155,17 +248,19 @@ export default function AuthLoginPage() {
 
               <p className="paw-resend">
                 Didn&apos;t receive code?{" "}
-                <button type="button" onClick={handleSendOtp}>
-                  Resend
+                <button type="button" onClick={handleSendOtp} disabled={isSendingOtp}>
+                  {isSendingOtp ? "Sending..." : "Resend"}
                 </button>
               </p>
             </>
           ) : null}
 
+          {issuedOtp ? <p className="success-text">Demo OTP for {normalizedPhone}: <strong>{issuedOtp}</strong></p> : null}
+          {statusMessage ? <p className="success-text">{statusMessage}</p> : null}
           {error ? <p className="error-text">{error}</p> : null}
 
-          <button type="button" className="paw-gradient-button" onClick={handleLogin}>
-            {otpSent ? "Verify & Continue" : "Login"}
+          <button type="button" className="paw-gradient-button" onClick={handleLogin} disabled={isVerifyingOtp}>
+            {otpSent ? (isVerifyingOtp ? "Verifying..." : "Verify & Continue") : "Login"}
           </button>
 
           <div className="paw-divider">

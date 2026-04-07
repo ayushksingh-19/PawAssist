@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiAward, FiCheckCircle, FiCreditCard, FiDollarSign, FiShield, FiSliders } from "react-icons/fi";
 import PawAssistBrand from "../components/ui/PawAssistBrand";
+import heroImage from "../assets/hero.png";
+import guaranteePet1 from "../assets/guarantee-pet-1.jpg";
+import guaranteePet2 from "../assets/guarantee-pet-2.jpg";
+import guaranteePet3 from "../assets/guarantee-pet-3.jpg";
 import useUserStore from "../store/useUserStore";
 
 const serviceTiles = [
@@ -68,9 +72,9 @@ const guaranteeRight = [
 ];
 
 const guaranteeImages = [
-  "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=1200&q=80",
+  guaranteePet1,
+  guaranteePet2,
+  guaranteePet3,
 ];
 
 const reviews = [
@@ -82,8 +86,8 @@ const reviews = [
       "We had such a fantastic experience with the grooming professionals. Their attention to detail and calm handling made the whole session feel effortless and premium.",
     petLabel: "Casper: Before and After",
     images: [
-      "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=700&q=80",
-      "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=700&q=80",
+      "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=700&q=80",
+      "https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?auto=format&fit=crop&w=700&q=80",
     ],
   },
   {
@@ -94,8 +98,8 @@ const reviews = [
       "The consultation flow felt thoughtful and reassuring. From the first question to the final recommendation, everything was organized and easy to trust.",
     petLabel: "Tyson: During Treatment",
     images: [
-      "https://images.unsplash.com/photo-1576201836106-db1758fd1c97?auto=format&fit=crop&w=700&q=80",
-      "https://images.unsplash.com/photo-1534361960057-19889db9621e?auto=format&fit=crop&w=700&q=80",
+      "https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?auto=format&fit=crop&w=700&q=80",
+      "https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=700&q=80",
     ],
   },
   {
@@ -106,8 +110,8 @@ const reviews = [
       "I loved being able to preview the platform first. Once I signed in, booking grooming and checking follow-up details felt incredibly smooth.",
     petLabel: "Milo: Spa Day",
     images: [
-      "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=700&q=80",
-      "https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=700&q=80",
+      "https://images.unsplash.com/photo-1505628346881-b72b27e84530?auto=format&fit=crop&w=700&q=80",
+      "https://images.unsplash.com/photo-1583512603872-1f6d86f47b3d?auto=format&fit=crop&w=700&q=80",
     ],
   },
   {
@@ -118,8 +122,8 @@ const reviews = [
       "The emergency lane is what sold me. It feels fast, but not messy. You always know what the next step is.",
     petLabel: "Bruno: Emergency Response",
     images: [
-      "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=700&q=80",
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=700&q=80",
+      "https://images.unsplash.com/photo-1591160690555-5debfba289f0?auto=format&fit=crop&w=700&q=80",
+      "https://images.unsplash.com/photo-1548681528-6a5c45b66b42?auto=format&fit=crop&w=700&q=80",
     ],
   },
   {
@@ -130,8 +134,8 @@ const reviews = [
       "The AI guidance helped me understand what was urgent and what could wait. That clarity alone made the app worth using.",
     petLabel: "Leo: AI Guidance",
     images: [
-      "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=700&q=80",
-      "https://images.unsplash.com/photo-1525253086316-d0c936c814f8?auto=format&fit=crop&w=700&q=80",
+      "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=700&q=80",
+      "https://images.unsplash.com/photo-1581888227599-779811939961?auto=format&fit=crop&w=700&q=80",
     ],
   },
   {
@@ -142,8 +146,8 @@ const reviews = [
       "The platform feels modern and premium, but still very clear. Nothing feels buried or confusing.",
     petLabel: "Nova: Care Timeline",
     images: [
-      "https://images.unsplash.com/photo-1548681528-6a5c45b66b42?auto=format&fit=crop&w=700&q=80",
-      "https://images.unsplash.com/photo-1519052537078-e6302a4968d4?auto=format&fit=crop&w=700&q=80",
+      "https://images.unsplash.com/photo-1586671267731-da2cf3ceeb80?auto=format&fit=crop&w=700&q=80",
+      "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?auto=format&fit=crop&w=700&q=80",
     ],
   },
   {
@@ -154,8 +158,8 @@ const reviews = [
       "I was impressed by how the dashboard preview showed enough detail to build trust before even logging in.",
     petLabel: "Coco: Preview Experience",
     images: [
-      "https://images.unsplash.com/photo-1507146426996-ef05306b995a?auto=format&fit=crop&w=700&q=80",
-      "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=700&q=80",
+      "https://images.unsplash.com/photo-1600804340584-c7db2eacf0bf?auto=format&fit=crop&w=700&q=80",
+      "https://images.unsplash.com/photo-1529429612778-0f3224f1ec27?auto=format&fit=crop&w=700&q=80",
     ],
   },
   {
@@ -166,8 +170,8 @@ const reviews = [
       "The service packaging is smart. It feels like the app understands the difference between routine care and urgent care.",
     petLabel: "Mochi: Service Match",
     images: [
-      "https://images.unsplash.com/photo-1576201836106-db1758fd1c97?auto=format&fit=crop&w=700&q=80",
-      "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=700&q=80",
+      "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=700&q=80",
+      "https://images.unsplash.com/photo-1516222338250-863216ce01ea?auto=format&fit=crop&w=700&q=80",
     ],
   },
   {
@@ -178,8 +182,8 @@ const reviews = [
       "The overall aesthetic made a big difference. It feels less like a utility app and more like a thoughtful care platform.",
     petLabel: "Toby: Routine Care",
     images: [
-      "https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=700&q=80",
-      "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=700&q=80",
+      "https://images.unsplash.com/photo-1523480717984-24cba35ae1ef?auto=format&fit=crop&w=700&q=80",
+      "https://images.unsplash.com/photo-1601979031925-424e53b6caaa?auto=format&fit=crop&w=700&q=80",
     ],
   },
   {
@@ -190,8 +194,8 @@ const reviews = [
       "From consultation to follow-up, the whole journey felt connected. That continuity is what makes PawAssist stand out.",
     petLabel: "Zoe: Follow-up Support",
     images: [
-      "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=700&q=80",
-      "https://images.unsplash.com/photo-1534361960057-19889db9621e?auto=format&fit=crop&w=700&q=80",
+      "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=700&q=80",
+      "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=700&q=80",
     ],
   },
 ];
@@ -300,11 +304,6 @@ export default function PostLoginHome() {
             <span>Care companion for modern pet parents</span>
           </div>
         </div>
-        <div className="wickret-home-links">
-          <button type="button" onClick={() => navigateWithAuth("/app/grooming")}>Benefits</button>
-          <button type="button" onClick={() => navigateWithAuth("/app/insurance")}>Security</button>
-          <button type="button" onClick={() => navigate("/explore")}>Download</button>
-        </div>
       </section>
 
       <section className="wickret-clone-hero">
@@ -333,8 +332,8 @@ export default function PostLoginHome() {
             <button type="button" className="primary-button wickret-magnetic-button" onClick={() => navigate("/explore")}>
               Explore
             </button>
-            <button type="button" className="ghost-button wickret-magnetic-button" onClick={() => navigateWithAuth("/app/ai-assistant?mode=triage")}>
-              AI Assist
+            <button type="button" className="ghost-button wickret-magnetic-button" onClick={() => navigate("/register")}>
+              Register
             </button>
           </div>
           <div className="wickret-floating-lines" aria-hidden="true">
@@ -361,7 +360,7 @@ export default function PostLoginHome() {
               <div className="wickret-phone-screen">
               <div className="wickret-phone-surface" />
                 <img
-                  src="https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=1200&q=80"
+                  src="https://images.unsplash.com/photo-1600804340584-c7db2eacf0bf?auto=format&fit=crop&w=1200&q=80"
                   alt="Healthy happy dog"
                   className="wickret-phone-image"
                 />
@@ -376,10 +375,6 @@ export default function PostLoginHome() {
                 <div className="wickret-status-chip chip-top" aria-hidden="true">
                   <span className="chip-dot" />
                   Live wellness feed
-                </div>
-                <div className="wickret-ui-card primary">
-                  <span><i className="wickret-pulse-dot" />AI Assist</span>
-                  <strong>Symptoms organized instantly</strong>
                 </div>
                 <div className="wickret-ui-card secondary">
                   <span>Next action</span>
@@ -425,6 +420,10 @@ export default function PostLoginHome() {
                 src={guaranteeImages[activeGuaranteeImage]}
                 alt="Happy pet"
                 className="wickret-guarantee-image"
+                onError={(event) => {
+                  event.currentTarget.onerror = null;
+                  event.currentTarget.src = heroImage;
+                }}
               />
             </div>
           </div>

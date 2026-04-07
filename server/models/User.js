@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { createDefaultSettings } = require("../data/settingsDefaults");
 
 const userSchema = new mongoose.Schema(
   {
@@ -11,6 +12,18 @@ const userSchema = new mongoose.Schema(
     notes: {
       type: String,
       default: "Appointments, health reminders, and support updates",
+    },
+    settings: {
+      type: mongoose.Schema.Types.Mixed,
+      default: createDefaultSettings,
+    },
+    passwordHash: {
+      type: String,
+      default: "",
+    },
+    passwordSalt: {
+      type: String,
+      default: "",
     },
   },
   { timestamps: true },
