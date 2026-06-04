@@ -1,6 +1,7 @@
 {
   "name": "pawassist-server",
   "version": "1.0.0",
+  "license": "SEE LICENSE IN LICENSE",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
