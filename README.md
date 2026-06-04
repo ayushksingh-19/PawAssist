@@ -253,7 +253,9 @@ Areas still suited for future polish:
 - Add Docker support and more formal environment promotion flows
 
 
-<<<<<<< Updated upstream
-=======
-This repository currently does not include a root `LICENSE` file. Add one if you want GitHub to display project licensing explicitly.
->>>>>>> Stashed changes
+## License
+
+This repository is `UNLICENSED`.
+
+It is intended for frontend learning, reference, and personal educational use only.
+You are not permitted to copy, redistribute, republish, or claim this project as your own work without explicit written permission.
